@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info
+*.log
+
+# Virtual environments
+venv/
+env/
+*.env
+
+# Flask specific
+instance/
+*.db
+*.sqlite3
+
+# Web (optional)
+node_modules/
+dist/
+build/
+
+# OS / OneDrive Junk
+Thumbs.db
+desktop.ini
+*.tmp
+*.lnk
+~$*
+
+# IDE files
+.vscode/
+.idea/
+.DS_Store

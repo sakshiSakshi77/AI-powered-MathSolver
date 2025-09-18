@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing Canvas Interface</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .canvas-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .canvas-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        #drawingCanvas {
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            cursor: crosshair;
+            background: white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        #drawingCanvas:hover {
+            transform: scale(1.02);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .control-group label {
+            color: #333;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        input[type="range"] {
+            width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        input[type="color"] {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .upload-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+            color: #333;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+        }
+        
+        .status.error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #F44336;
+        }
+        
+        .status.info {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196F3;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .instructions ol {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            #drawingCanvas {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+        /* Add loading overlay styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Add modal styles for manual correction */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .modal button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="stepper" style="display:flex;justify-content:center;align-items:center;margin-bottom:20px;">
+            <div id="step1" class="step active-step">1. Draw</div>
+            <div style="width:40px;height:2px;background:#667eea;margin:0 8px;"></div>
+            <div id="step2" class="step">2. Label</div>
+            <div style="width:40px;height:2px;background:#667eea;margin:0 8px;"></div>
+            <div id="step3" class="step">3. Add Text</div>
+        </div>
+        <style>
+            .step {padding:6px 18px;border-radius:12px;background:#e0e7ff;color:#333;font-weight:600;}
+            .active-step {background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
+        </style>
+        <div id="step-content">
+            <!-- Step content will be injected here -->
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>Analyzing your math problem...</h3>
+            <p>Please wait while we process your equation</p>
+        </div>
+    </div>
+
+    <!-- Manual Correction Modal -->
+    <div id="correctionModal" class="modal">
+        <div class="modal-content">
+            <h3>Correct OCR Result</h3>
+            <p>Please review and correct the detected math expression:</p>
+            <input type="text" id="ocrCorrectionInput" placeholder="Enter corrected math expression">
+            <div style="text-align: right; margin-top: 15px;">
+                <button class="btn-secondary" onclick="cancelCorrection()">Cancel</button>
+                <button class="btn-primary" onclick="confirmCorrection()">Solve</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let canvas, ctx;
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let brushSize = 3;
+        let brushColor = '#000000';
+        let strokes = [];
+        let currentStroke = [];
+        let shapeTool = 'freehand';
+        let shapeStart = null;
+        let previewShape = null;
+        let currentStep = 1;
+        let labels = [];
+        let questionText = '';
+        let drawingDataUrl = null;
+        
+        // Initialize when page loads
+        window.onload = function() {
+            renderStep();
+        };
+        
+        // Initialize canvas
+        function initCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas properties
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = brushSize;
+            ctx.strokeStyle = brushColor;
+            
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Drawing events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', handleTouch);
+            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            // Control events
+            document.getElementById('brushSize').addEventListener('input', updateBrushSize);
+            document.getElementById('brushColor').addEventListener('change', updateBrushColor);
+            
+            // Drag and drop events
+            const uploadArea = document.querySelector('.upload-area');
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+        }
+        
+        // Drawing functions
+        function setShapeTool(tool) {
+            shapeTool = tool;
+            // Highlight selected tool
+            ['freehand','rectangle','circle','line','triangle'].forEach(t => {
+                document.getElementById('tool-' + t).style.background = (t === tool) ? 'linear-gradient(135deg, #667eea, #764ba2)' : '';
+                document.getElementById('tool-' + t).style.color = (t === tool) ? '#fff' : '';
+            });
+        }
+
+        function startDrawing(e) {
+            if (shapeTool === 'freehand') {
+                isDrawing = true;
+                [lastX, lastY] = getMousePos(e);
+                currentStroke = [{ x: lastX, y: lastY, size: brushSize, color: brushColor }];
+            } else {
+                shapeStart = getMousePos(e);
+                previewShape = null;
+            }
+        }
+        
+        function draw(e) {
+            if (shapeTool === 'freehand') {
+                if (!isDrawing) return;
+                const [currentX, currentY] = getMousePos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+                currentStroke.push({ x: currentX, y: currentY, size: brushSize, color: brushColor });
+                [lastX, lastY] = [currentX, currentY];
+            } else if (shapeStart) {
+                // Draw preview shape
+                redrawCanvas();
+                const [x2, y2] = getMousePos(e);
+                ctx.save();
+                ctx.strokeStyle = brushColor;
+                ctx.lineWidth = brushSize;
+                ctx.setLineDash([6, 4]);
+                if (shapeTool === 'rectangle') {
+                    ctx.strokeRect(shapeStart[0], shapeStart[1], x2-shapeStart[0], y2-shapeStart[1]);
+                    previewShape = {type:'rectangle',x:shapeStart[0],y:shapeStart[1],w:x2-shapeStart[0],h:y2-shapeStart[1],color:brushColor,size:brushSize};
+                } else if (shapeTool === 'circle') {
+                    let r = Math.sqrt(Math.pow(x2-shapeStart[0],2)+Math.pow(y2-shapeStart[1],2));
+                    ctx.beginPath();
+                    ctx.arc(shapeStart[0], shapeStart[1], r, 0, 2*Math.PI);
+                    ctx.stroke();
+                    previewShape = {type:'circle',x:shapeStart[0],y:shapeStart[1],r:r,color:brushColor,size:brushSize};
+                } else if (shapeTool === 'line') {
+                    ctx.beginPath();
+                    ctx.moveTo(shapeStart[0], shapeStart[1]);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                    previewShape = {type:'line',x1:shapeStart[0],y1:shapeStart[1],x2:x2,y2:y2,color:brushColor,size:brushSize};
+                } else if (shapeTool === 'triangle') {
+                    // Draw isosceles triangle
+                    let baseX = shapeStart[0], baseY = shapeStart[1];
+                    let tipX = x2, tipY = y2;
+                    let thirdX = 2*baseX - tipX, thirdY = tipY;
+                    ctx.beginPath();
+                    ctx.moveTo(baseX, baseY);
+                    ctx.lineTo(tipX, tipY);
+                    ctx.lineTo(thirdX, thirdY);
+                    ctx.closePath();
+                    ctx.stroke();
+                    previewShape = {type:'triangle',points:[[baseX,baseY],[tipX,tipY],[thirdX,thirdY]],color:brushColor,size:brushSize};
+                }
+                ctx.restore();
+            }
+        }
+        
+        function stopDrawing(e) {
+            if (shapeTool === 'freehand') {
+                if (isDrawing) {
+                    strokes.push([...currentStroke]);
+                    currentStroke = [];
+                }
+                isDrawing = false;
+            } else if (shapeStart && previewShape) {
+                // Commit the shape to strokes
+                if (shapeTool === 'rectangle') {
+                    strokes.push([{type:'rectangle',...previewShape}]);
+                } else if (shapeTool === 'circle') {
+                    strokes.push([{type:'circle',...previewShape}]);
+                } else if (shapeTool === 'line') {
+                    strokes.push([{type:'line',...previewShape}]);
+                } else if (shapeTool === 'triangle') {
+                    strokes.push([{type:'triangle',...previewShape}]);
+                }
+                previewShape = null;
+                shapeStart = null;
+                redrawCanvas();
+            }
+        }
+        
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return [
+                e.clientX - rect.left,
+                e.clientY - rect.top
+            ];
+        }
+        
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+        
+        // Control functions
+        function updateBrushSize(e) {
+            brushSize = e.target.value;
+            ctx.lineWidth = brushSize;
+            document.getElementById('brushSizeValue').textContent = brushSize;
+        }
+        
+        function updateBrushColor(e) {
+            brushColor = e.target.value;
+            ctx.strokeStyle = brushColor;
+        }
+        
+        function clearCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            strokes = [];
+            showStatus('Canvas cleared!', 'info');
+        }
+        
+        function undoLastStroke() {
+            if (strokes.length > 0) {
+                strokes.pop();
+                redrawCanvas();
+                showStatus('Last stroke undone!', 'info');
+            }
+        }
+        
+        function redrawCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            strokes.forEach(stroke => {
+                if (stroke.length > 0) {
+                    if (stroke[0].type === 'rectangle') {
+                        let s = stroke[0];
+                        ctx.save();
+                        ctx.strokeStyle = s.color;
+                        ctx.lineWidth = s.size;
+                        ctx.strokeRect(s.x, s.y, s.w, s.h);
+                        ctx.restore();
+                    } else if (stroke[0].type === 'circle') {
+                        let s = stroke[0];
+                        ctx.save();
+                        ctx.strokeStyle = s.color;
+                        ctx.lineWidth = s.size;
+                        ctx.beginPath();
+                        ctx.arc(s.x, s.y, s.r, 0, 2*Math.PI);
+                        ctx.stroke();
+                        ctx.restore();
+                    } else if (stroke[0].type === 'line') {
+                        let s = stroke[0];
+                        ctx.save();
+                        ctx.strokeStyle = s.color;
+                        ctx.lineWidth = s.size;
+                        ctx.beginPath();
+                        ctx.moveTo(s.x1, s.y1);
+                        ctx.lineTo(s.x2, s.y2);
+                        ctx.stroke();
+                        ctx.restore();
+                    } else if (stroke[0].type === 'triangle') {
+                        let s = stroke[0];
+                        ctx.save();
+                        ctx.strokeStyle = s.color;
+                        ctx.lineWidth = s.size;
+                        ctx.beginPath();
+                        ctx.moveTo(s.points[0][0], s.points[0][1]);
+                        ctx.lineTo(s.points[1][0], s.points[1][1]);
+                        ctx.lineTo(s.points[2][0], s.points[2][1]);
+                        ctx.closePath();
+                        ctx.stroke();
+                        ctx.restore();
+                    } else {
+                        ctx.strokeStyle = stroke[0].color;
+                        ctx.lineWidth = stroke[0].size;
+                        ctx.beginPath();
+                        ctx.moveTo(stroke[0].x, stroke[0].y);
+                        
+                        for (let i = 1; i < stroke.length; i++) {
+                            ctx.lineTo(stroke[i].x, stroke[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                }
+            });
+            
+            // Restore current settings
+            ctx.strokeStyle = brushColor;
+            ctx.lineWidth = brushSize;
+        }
+        
+        function saveDrawing() {
+            const link = document.createElement('a');
+            link.download = 'drawing_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showStatus('Drawing saved successfully!', 'success');
+        }
+        
+        // File handling functions
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.querySelector('.upload-area').classList.add('dragover');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.querySelector('.upload-area').classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.querySelector('.upload-area').classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+        
+        function processFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showStatus('Please select an image file!', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Display the image on canvas
+                    const scaleFactor = Math.min(canvas.width / img.width, canvas.height / img.height);
+                    const newWidth = img.width * scaleFactor;
+                    const newHeight = img.height * scaleFactor;
+                    const x = (canvas.width - newWidth) / 2;
+                    const y = (canvas.height - newHeight) / 2;
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, x, y, newWidth, newHeight);
+                    
+                    showStatus(`Image loaded! Save it and run Python analysis. File: ${file.name}`, 'success');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Initialize with ready message
+        setTimeout(() => {
+            showStatus('Ready to draw! Create your diagram and save it for Python analysis.', 'info');
+        }, 500);
+
+        function analyzeDrawing() {
+            showStatus('Analyzing drawing, please wait...', 'info');
+            canvas.toBlob(function(blob) {
+                const formData = new FormData();
+                formData.append('image', blob, 'drawing.png');
+                fetch('http://localhost:5000/analyze', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showStatus('Analysis failed: ' + data.error, 'error');
+                        return;
+                    }
+                    showStatus('Analysis complete! See results below.', 'success');
+                    displayAnalysisResults(data);
+                })
+                .catch(err => {
+                    showStatus('Error connecting to backend: ' + err, 'error');
+                });
+            }, 'image/png');
+        }
+
+        function displayAnalysisResults(data) {
+            // Remove old results if any
+            let oldDiv = document.getElementById('analysisResults');
+            if (oldDiv) oldDiv.remove();
+            // Create new results div
+            const div = document.createElement('div');
+            div.id = 'analysisResults';
+            div.style.background = 'rgba(255,255,255,0.95)';
+            div.style.color = '#222';
+            div.style.padding = '20px';
+            div.style.margin = '20px 0';
+            div.style.borderRadius = '15px';
+            div.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            // Visualization image
+            if (data.visualization) {
+                const img = document.createElement('img');
+                img.src = 'data:image/png;base64,' + data.visualization;
+                img.style.maxWidth = '100%';
+                img.style.display = 'block';
+                img.style.margin = '0 auto 20px auto';
+                div.appendChild(img);
+            }
+            // Structured shape results
+            if (data.results && data.results.shapes && data.results.shapes.length > 0) {
+                const shapesTitle = document.createElement('h3');
+                shapesTitle.textContent = 'Detected Shapes';
+                shapesTitle.style.textAlign = 'center';
+                div.appendChild(shapesTitle);
+                data.results.shapes.forEach((shape, idx) => {
+                    const card = document.createElement('div');
+                    card.style.background = '#f7f7fa';
+                    card.style.border = '1px solid #ddd';
+                    card.style.borderRadius = '10px';
+                    card.style.margin = '15px auto';
+                    card.style.padding = '15px 20px';
+                    card.style.maxWidth = '500px';
+                    card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                    card.innerHTML = `
+                        <strong>Shape ${idx+1}: ${shape.type}</strong> <span style="color:#888;font-size:0.9em;">(Confidence: ${(shape.confidence*100).toFixed(1)}%)</span><br>
+                        <table style="width:100%;margin-top:10px;font-size:1em;">
+                          <tr><td><b>Area</b></td><td>${shape.area.toFixed(2)} px²</td></tr>
+                          <tr><td><b>Perimeter</b></td><td>${shape.perimeter.toFixed(2)} px</td></tr>
+                          <tr><td><b>Circularity</b></td><td>${shape.circularity.toFixed(3)}</td></tr>
+                          <tr><td><b>Bounding Box</b></td><td>X: ${shape.bounding_box.x}, Y: ${shape.bounding_box.y}, W: ${shape.bounding_box.width}, H: ${shape.bounding_box.height}</td></tr>
+                          <tr><td><b>Centroid</b></td><td>X: ${shape.centroid.x}, Y: ${shape.centroid.y}</td></tr>
+                          <tr><td><b>Vertices</b></td><td>${shape.vertices}</td></tr>
+                          <tr><td><b>Aspect Ratio</b></td><td>${shape.aspect_ratio.toFixed(3)}</td></tr>
+                        </table>
+                    `;
+                    // Add interactive calculation form
+                    const calcDiv = document.createElement('div');
+                    calcDiv.style.marginTop = '15px';
+                    calcDiv.style.background = '#eef2fa';
+                    calcDiv.style.padding = '10px 15px';
+                    calcDiv.style.borderRadius = '8px';
+                    // Dynamic form fields based on shape type
+                    let formHtml = '';
+                    let params = [];
+                    let calcOptions = '';
+                    if (shape.type === 'Rectangle' || shape.type === 'Square') {
+                        formHtml += 'Length (l): <input type="number" step="any" name="l" style="width:60px;"> ';
+                        formHtml += 'Breadth (b): <input type="number" step="any" name="b" style="width:60px;"> ';
+                        params = ['l','b'];
+                        calcOptions = '<option value="area">Area</option><option value="perimeter">Perimeter</option><option value="volume">Volume (l*b*h)</option>';
+                    } else if (shape.type === 'Circle') {
+                        formHtml += 'Radius (r): <input type="number" step="any" name="r" style="width:60px;"> ';
+                        params = ['r'];
+                        calcOptions = '<option value="area">Area</option><option value="perimeter">Circumference</option><option value="volume">Volume (4/3πr³)</option>';
+                    } else if (shape.type === 'Triangle') {
+                        formHtml += 'Base (b): <input type="number" step="any" name="b" style="width:60px;"> ';
+                        formHtml += 'Height (h): <input type="number" step="any" name="h" style="width:60px;"> ';
+                        params = ['b','h'];
+                        calcOptions = '<option value="area">Area</option><option value="perimeter">Perimeter (equilateral)</option>';
+                    } else {
+                        formHtml += 'Side (s): <input type="number" step="any" name="s" style="width:60px;"> ';
+                        params = ['s'];
+                        calcOptions = '<option value="perimeter">Perimeter (approx)</option>';
+                    }
+                    // Add height for volume if needed
+                    if (calcOptions.includes('Volume')) {
+                        formHtml += 'Height (h): <input type="number" step="any" name="h" style="width:60px;"> ';
+                    }
+                    formHtml += `<br>Calculate: <select name="calcType">${calcOptions}</select> <button type="button">Calculate</button>`;
+                    calcDiv.innerHTML = formHtml + '<div class="calcResult" style="margin-top:8px;font-weight:bold;"></div>';
+                    // Add event listener for calculation
+                    const button = calcDiv.querySelector('button');
+                    button.onclick = function() {
+                        const form = button.parentElement;
+                        const resultDiv = form.querySelector('.calcResult');
+                        let l = parseFloat(form.querySelector('[name="l"]')?.value);
+                        let b = parseFloat(form.querySelector('[name="b"]')?.value);
+                        let r = parseFloat(form.querySelector('[name="r"]')?.value);
+                        let h = parseFloat(form.querySelector('[name="h"]')?.value);
+                        let s = parseFloat(form.querySelector('[name="s"]')?.value);
+                        let calcType = form.querySelector('[name="calcType"]').value;
+                        let payload = {
+                            shape_type: shape.type,
+                            calc_type: calcType,
+                            l: l, b: b, r: r, h: h, s: s,
+                            vertices: shape.vertices
+                        };
+                        fetch('http://localhost:5000/calculate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.error) resultDiv.textContent = 'Error: ' + data.error;
+                            else resultDiv.textContent = 'Result: ' + data.result;
+                        })
+                        .catch(err => {
+                            resultDiv.textContent = 'Error: ' + err;
+                        });
+                    };
+                    card.appendChild(calcDiv);
+                    div.appendChild(card);
+                });
+            } else {
+                const noShapes = document.createElement('div');
+                noShapes.textContent = 'No shapes detected.';
+                noShapes.style.textAlign = 'center';
+                noShapes.style.color = '#b00';
+                div.appendChild(noShapes);
+            }
+            // Optionally, show raw JSON below
+            const pre = document.createElement('pre');
+            pre.textContent = JSON.stringify(data.results, null, 2);
+            pre.style.background = '#f4f4f4';
+            pre.style.color = '#333';
+            pre.style.padding = '10px';
+            pre.style.borderRadius = '8px';
+            pre.style.overflowX = 'auto';
+            pre.style.marginTop = '20px';
+            div.appendChild(pre);
+            // Add to container
+            document.querySelector('.container').appendChild(div);
+        }
+
+        function renderStep() {
+            // Update stepper UI
+            for (let i=1; i<=3; ++i) {
+                document.getElementById('step'+i).classList.toggle('active-step', i===currentStep);
+            }
+            // Render content for current step
+            const content = document.getElementById('step-content');
+            content.innerHTML = '';
+            if (currentStep === 1) {
+                // Step 1: Draw
+                content.innerHTML = `
+                    <div class="instructions"><b>Step 1:</b> Draw your diagram using the tools below, then click Next.</div>
+                    <div id="draw-controls">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Tool:</label>
+                                <button id="tool-freehand" type="button" title="Freehand">✏️</button>
+                                <button id="tool-rectangle" type="button" title="Rectangle">▭</button>
+                                <button id="tool-circle" type="button" title="Circle">◯</button>
+                                <button id="tool-line" type="button" title="Line">／</button>
+                                <button id="tool-triangle" type="button" title="Triangle">△</button>
+                            </div>
+                            <div class="control-group">
+                                <label for="brushSize">Size:</label>
+                                <input type="range" id="brushSize" min="1" max="20" value="3">
+                                <span id="brushSizeValue">3</span>
+                            </div>
+                            <div class="control-group">
+                                <label for="brushColor">Color:</label>
+                                <input type="color" id="brushColor" value="#000000">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="canvas-section">
+                        <h3>Drawing Canvas</h3>
+                        <canvas id="drawingCanvas" width="600" height="400"></canvas>
+                        <div style="margin-top:10px;text-align:right;">
+                            <button onclick="undoLastStroke()">Undo</button>
+                            <button onclick="clearCanvas()">Clear Canvas</button>
+                        </div>
+                    </div>
+                    <div style="text-align:right;margin-top:10px;">
+                        <button onclick="detectTypeFromCanvas()">Detect Type</button>
+                        <button onclick="goToStep(2)">Next &rarr;</button>
+                    </div>
+                `;
+                setTimeout(() => {
+                    // Tool button event listeners
+                    document.getElementById('tool-freehand').onclick = () => setShapeTool('freehand');
+                    document.getElementById('tool-rectangle').onclick = () => setShapeTool('rectangle');
+                    document.getElementById('tool-circle').onclick = () => setShapeTool('circle');
+                    document.getElementById('tool-line').onclick = () => setShapeTool('line');
+                    document.getElementById('tool-triangle').onclick = () => setShapeTool('triangle');
+                    setShapeTool(shapeTool); // highlight current tool
+                    initCanvas();
+                    setupEventListeners();
+                    redrawCanvas();
+                    // Restore drawing in Step 1
+                    if (drawingDataUrl) {
+                        let img = new Image();
+                        img.onload = function() {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(img, 0, 0);
+                        };
+                        img.src = drawingDataUrl;
+                    }
+                }, 0);
+            } else if (currentStep === 2) {
+                // Step 2: Label
+                content.innerHTML = `
+                    <div class="instructions"><b>Step 2:</b> Click on the diagram to add labels to sides, angles, or points. Click a label to erase it. Click Next when done.</div>
+                    <div class="canvas-section">
+                        <h3>Label Diagram</h3>
+                        <canvas id="drawingCanvas" width="600" height="400"></canvas>
+                        <div style="margin-top:10px;text-align:right;">
+                            <button onclick="undoLastLabel()">Undo Label</button>
+                            <button onclick="clearLabels()">Clear Labels</button>
+                        </div>
+                    </div>
+                    <div style="text-align:right;margin-top:10px;">
+                        <button onclick="goToStep(1)">&larr; Back</button>
+                        <button onclick="goToStep(3)">Next &rarr;</button>
+                    </div>
+                `;
+                setTimeout(() => { initCanvas(); redrawCanvas(); drawLabels();
+                    document.getElementById('drawingCanvas').addEventListener('click', labelCanvasClick);
+                }, 0);
+            } else if (currentStep === 3) {
+                // Step 3: Add Text
+                content.innerHTML = `
+                    <div class="instructions"><b>Step 3:</b> Enter your question or instruction for the diagram.</div>
+                    <div class="canvas-section">
+                        <h3>Drawing Canvas</h3>
+                        <canvas id="drawingCanvas" width="600" height="400"></canvas>
+                    </div>
+                    <textarea id="questionInput" rows="2" style="width:100%;font-size:1.1em;padding:8px;border-radius:8px;border:1px solid #ccc;">${questionText}</textarea>
+                    <div style="text-align:right;margin-top:10px;">
+                        <button onclick="goToStep(2)">&larr; Back</button>
+                        <button onclick="submitAll()">Submit</button>
+                    </div>
+                `;
+                setTimeout(() => {
+                    document.getElementById('questionInput').addEventListener('input', e => questionText = e.target.value);
+                    // Restore drawing in Step 3
+                    const canvas = document.getElementById('drawingCanvas');
+                    if (canvas && drawingDataUrl) {
+                        let ctx = canvas.getContext('2d');
+                        let img = new Image();
+                        img.onload = function() {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(img, 0, 0);
+                        };
+                        img.src = drawingDataUrl;
+                    }
+                }, 0);
+            }
+        }
+        function goToStep(step) {
+            // Save drawing when leaving Step 1
+            if (currentStep === 1 && step !== 1) {
+                const canvas = document.getElementById('drawingCanvas');
+                if (canvas) {
+                    drawingDataUrl = canvas.toDataURL();
+                }
+            }
+            currentStep = step;
+            renderStep();
+        }
+        function labelCanvasClick(e) {
+            const canvas = document.getElementById('drawingCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            // Check if clicking on a label to erase
+            for (let i = labels.length - 1; i >= 0; --i) {
+                const lab = labels[i];
+                const dx = x - lab.x, dy = y - lab.y;
+                if (Math.sqrt(dx*dx + dy*dy) < 18) { // within label radius
+                    if (confirm('Erase label "' + lab.text + '"?')) {
+                        labels.splice(i, 1);
+                        drawLabels();
+                        return;
+                    }
+                }
+            }
+            // Otherwise, add new label
+            const label = prompt('Enter label (e.g., a, b, C, θ):');
+            if (label) {
+                labels.push({x, y, text: label});
+                drawLabels();
+            }
+        }
+        function drawLabels() {
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            labels.forEach(lab => {
+                ctx.save();
+                ctx.font = 'bold 18px Segoe UI, Arial';
+                ctx.fillStyle = '#d7263d';
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.strokeText(lab.text, lab.x, lab.y);
+                ctx.fillText(lab.text, lab.x, lab.y);
+                ctx.restore();
+            });
+        }
+        function undoLastLabel() {
+            labels.pop();
+            drawLabels();
+        }
+        function clearLabels() {
+            labels = [];
+            drawLabels();
+        }
+        function submitAll() {
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            const canvas = document.getElementById('drawingCanvas');
+            if (!canvas) {
+                console.error('No canvas found!');
+                document.getElementById('loadingOverlay').style.display = 'none';
+                return;
+            }
+            
+            canvas.toBlob(function(blob) {
+                const formData = new FormData();
+                formData.append('image', blob, 'canvas.png');
+                fetch('http://localhost:5000/ocr', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('OCR response:', data);
+                    
+                    // Handle OCR errors
+                    if (data.error) {
+                        console.error('OCR error:', data.error);
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        showResult('OCR Error', data.error, 'error');
+                        return;
+                    }
+                    
+                    // Extract OCR text from new response format
+                    let ocrText = '';
+                    if (data.postprocessed) {
+                        ocrText = data.postprocessed.trim();
+                    } else if (data.ocr_output) {
+                        ocrText = data.ocr_output.trim();
+                    }
+                    
+                    console.log('OCR text:', ocrText);
+                    
+                    // If no OCR text, show error
+                    if (!ocrText) {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        showResult('No Math Detected', 'Please write your math problem more clearly.', 'error');
+                        return;
+                    }
+                    
+                    // Show correction modal instead of auto-using OCR result
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    showCorrectionModal(ocrText);
+                })
+                .catch(err => {
+                    // Hide loading overlay on error
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    console.error('OCR error:', err);
+                    showResult('Network Error', 'Failed to connect to OCR service. Please try again.', 'error');
+                });
+            }, 'image/png');
+        }
+        
+        function showResult(title, result, type = 'success', steps = '') {
+            // Remove any existing result
+            let oldDiv = document.getElementById('geminiResponse');
+            if (oldDiv) oldDiv.remove();
+            
+            const div = document.createElement('div');
+            div.id = 'geminiResponse';
+            div.style.background = type === 'error' ? 'rgba(255,200,200,0.95)' : 'rgba(255,255,255,0.95)';
+            div.style.color = '#222';
+            div.style.padding = '20px';
+            div.style.margin = '20px 0';
+            div.style.borderRadius = '15px';
+            div.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            div.style.border = type === 'error' ? '2px solid #ff6b6b' : '2px solid #4CAF50';
+            
+            let html = `<h3 style="margin-top: 0; color: ${type === 'error' ? '#d32f2f' : '#2e7d32'};">${title}</h3>`;
+            
+            if (result) {
+                html += `<div style="font-size: 18px; font-weight: bold; margin: 10px 0;">${result}</div>`;
+            }
+            
+            if (steps) {
+                html += `<details style="margin-top: 15px;"><summary style="cursor: pointer; font-weight: bold;">Show Steps</summary><pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; margin-top: 10px; white-space: pre-wrap;">${steps}</pre></details>`;
+            }
+            
+            div.innerHTML = html;
+            document.querySelector('.container').appendChild(div);
+        }
+
+        function detectTypeFromCanvas() {
+            const canvas = document.getElementById('drawingCanvas');
+            canvas.toBlob(function(blob) {
+                const formData = new FormData();
+                formData.append('image', blob, 'canvas.png');
+                fetch('http://localhost:5000/ocr', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('OCR error:', data.error);
+                        return;
+                    }
+                    const text = data.text.trim();
+                    if (isMathy(text)) {
+                        if (confirm('Detected math: "' + text + '"\nUse this as your question?')) {
+                            // Go to step 3 and fill question
+                            goToStep(3);
+                            setTimeout(() => {
+                                document.getElementById('questionInput').value = text;
+                                questionText = text;
+                            }, 100);
+                        }
+                    } else {
+                        console.log('No clear math detected. This looks like a diagram.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error connecting to backend: ' + err);
+                });
+            }, 'image/png');
+        }
+        function isMathy(text) {
+            // Heuristic: contains digits, math operators, or common math words
+            return /[0-9\+\-\*\/\=\^\(\)\[\]a-zA-Z]/.test(text) && /[\+\-\*\/\=]/.test(text);
+        }
+
+        function showCorrectionModal(ocrText) {
+            document.getElementById('ocrCorrectionInput').value = ocrText;
+            document.getElementById('correctionModal').style.display = 'block';
+        }
+        
+        function cancelCorrection() {
+            document.getElementById('correctionModal').style.display = 'none';
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+        
+        function confirmCorrection() {
+            const correctedText = document.getElementById('ocrCorrectionInput').value.trim();
+            document.getElementById('correctionModal').style.display = 'none';
+            
+            if (!correctedText) {
+                showResult('No Input', 'Please enter a math expression.', 'error');
+                return;
+            }
+            
+            // Use corrected text for solving
+            questionText = correctedText;
+            if (document.getElementById('questionInput')) {
+                document.getElementById('questionInput').value = correctedText;
+            }
+            
+            // Continue with solving
+            const payload = {
+                labels: labels,
+                question: questionText,
+                strokes: strokes
+            };
+            
+            console.log('Sending corrected text to solver:', payload);
+            
+            fetch('http://localhost:5000/solve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Solver response:', data);
+                
+                if (data.error) {
+                    showResult('Solver Error', data.error, 'error');
+                    return;
+                }
+                
+                let resultText = '';
+                let stepsText = '';
+                
+                if (data.result) {
+                    resultText = data.result;
+                }
+                
+                if (data.steps) {
+                    stepsText = data.steps;
+                }
+                
+                showResult('Math Solution', resultText, 'success', stepsText);
+            })
+            .catch(err => {
+                console.error('Solver error:', err);
+                showResult('Network Error', 'Failed to connect to solver. Please try again.', 'error');
+            });
+        }
+    </script>
+</body>
+</html>
